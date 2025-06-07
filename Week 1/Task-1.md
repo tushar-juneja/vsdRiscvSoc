@@ -1,5 +1,7 @@
 # Task-1: Install & Sanity-Check the RISC-V Toolchain
 
+The goal is to download, install and verify the risc-v toolchain on pc.
+
 ## Step 1: Download the Toolchain
 
 Download the RISC-V toolchain from the following link:  
