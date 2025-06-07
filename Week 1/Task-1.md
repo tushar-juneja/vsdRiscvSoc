@@ -58,7 +58,6 @@ riscv32-unknown-elf-gdb --version
 
 ## Problem/Issue Faced
 
-If you encounter the following error:
 ```bash
 riscv32-unknown-elf-gdb: error while loading shared libraries: libpython3.10.so.1.0: cannot open shared object file: No such file or directory
 ```
