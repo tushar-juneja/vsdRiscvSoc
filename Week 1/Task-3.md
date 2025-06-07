@@ -33,8 +33,8 @@ The **prologue** is the code at the start of a function. It:
 In our simple C program, the prologue is:
 ```assembly
 addi	sp,sp,-16       # Allocate 16 bytes on the stack
-sw	    ra,12(sp)       # Save return address
-sw	    s0,8(sp)        # Save old frame pointer
+sw	  ra,12(sp)       # Save return address
+sw	  s0,8(sp)        # Save old frame pointer
 addi	s0,sp,16        # Set new frame pointer (s0 = old sp)
 ```
 
@@ -49,6 +49,6 @@ In our program, the epilogue generated in the assembly file is:
 ```assembly
 lw	    ra,12(sp)        # Restore return address
 lw	    s0,8(sp)         # Restore old frame pointer
-addi	sp,sp,16         # Deallocate stack frame
+addi	  sp,sp,16         # Deallocate stack frame
 jr	    ra               # Jump to return address
 ```
