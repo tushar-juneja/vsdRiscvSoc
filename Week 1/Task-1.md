@@ -1,4 +1,4 @@
-# Install & Sanity-Check the RISC-V Toolchain
+# Task-1: Install & Sanity-Check the RISC-V Toolchain
 
 ## Step 1: Download the Toolchain
 
@@ -40,19 +40,19 @@ Check if the toolchain is installed correctly:
 riscv32-unknown-elf-gcc --version
 ```
 **Expected Output:**  
-![GCC](./assets/gcc.png)
+![GCC](./assets/Task-1/gcc.png)
 
 ```bash
 riscv32-unknown-elf-objdump --version
 ```
 **Expected Output:**  
-![ObjDump](./assets/objdump.png)
+![ObjDump](./assets/Task-1/objdump.png)
 
 ```bash
 riscv32-unknown-elf-gdb --version
 ```
 **Expected Output:**  
-![GDB](./assets/gdb.png)
+![GDB](./assets/Task-1/gdb.png)
 
 ---
 
