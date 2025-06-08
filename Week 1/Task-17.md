@@ -239,7 +239,6 @@ qemu-system-riscv32 -machine virt -nographic -bios none -kernel endianness.elf
 - Endianness affects how bit fields map to memory bytes
 
 ---
-
 ## Key Observations
 
 - **RISC-V is little-endian by default**: The union trick confirms LSB is stored at the lowest memory address

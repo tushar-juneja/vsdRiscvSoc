@@ -1,7 +1,6 @@
-# Weekly Tasks Summary
+# Complete Weekly Summary
 
-
-## Week-1
+# Week 1 Summary
 
 # Task-1: Install & Sanity-Check the RISC-V Toolchain
 
@@ -47,19 +46,19 @@ Check if the toolchain is installed correctly:
 riscv32-unknown-elf-gcc --version
 ```
 **Expected Output:**  
-![GCC](./assets/Task-1/gcc.png)
+![GCC](/Week%201/assets/Task-1/gcc.png)
 
 ```bash
 riscv32-unknown-elf-objdump --version
 ```
 **Expected Output:**  
-![ObjDump](./assets/Task-1/objdump.png)
+![ObjDump](/Week%201/assets/Task-1/objdump.png)
 
 ```bash
 riscv32-unknown-elf-gdb --version
 ```
 **Expected Output:**  
-![GDB](./assets/Task-1/gdb.png)
+![GDB](/Week%201/assets/Task-1/gdb.png)
 
 ---
 
@@ -80,6 +79,499 @@ sudo apt update
 sudo apt install python3.10 python3.10-dev
 ```
 
+---
+<br><br>
+# Task-2: Compile "Hello, RISC-V"
+
+We will write a very basic hello world kind of program in c and will cross-compile for rv32imc architecture, and verify the output elf file. 
+
+## Step 1: Create the Source File
+
+Create a file named `hello.c`:
+```bash
+vim hello.c
+```
+
+Paste the following code into `hello.c`:
+```c
+#include <stdio.h>
+
+int main() {
+    printf("Hello, RISC-V!");
+    return 0;
+}
+```
+
+---
+
+## Step 2: Compile for RISC-V
+
+Compile the program for the `rv32imac` target:
+```bash
+riscv32-unknown-elf-gcc -o hello.elf hello.c
+```
+
+![Output of program compilation](/Week%201/assets/Task-2/compilation.png)
+
+---
+
+## Step 3: Verify the Output File
+
+Check that the compiled file is an ELF file:
+```bash
+file hello.elf
+```
+
+![Elf file check](/Week%201/assets/Task-2/verification.png)
+
+---
+<br><br>
+# Task-3: From C to Assembly
+
+In this task, we will generate the assembly file for our simple C program and explain the meaning of **prologue** and **epilogue**.
+
+---
+
+## Step 1: Generate Assembly File
+
+Use the following command to generate the assembly file:
+```bash
+riscv32-unknown-elf-gcc -S -O0 hello.c
+```
+
+![Assembly file command](/Week%201/assets/Task-3/assembly_command.png)
+
+**Flags used:**
+- `-S`: Generate assembly instead of object code.
+- `-O0`: Disable optimizations to see the raw function structure.
+
+---
+
+## Understanding **Prologue** and **Epilogue**
+
+![Complete assembly code](/Week%201/assets/Task-3/assembly_code.png)
+
+### Prologue
+
+The **prologue** is the code at the start of a function. It:
+- Allocates stack space
+- Saves callee-saved registers (like `s0`, `ra`)
+- Sets up the frame pointer (`s0`)
+
+In our simple C program, the prologue is:
+```assembly
+addi	sp,sp,-16       # Allocate 16 bytes on the stack
+sw	ra,12(sp)       # Save return address
+sw	s0,8(sp)        # Save old frame pointer
+addi	s0,sp,16        # Set new frame pointer (s0 = old sp)
+```
+
+### Epilogue
+
+The **epilogue** is the code at the end of the function. It:
+- Restores saved registers
+- Deallocates stack
+- Returns to the caller
+
+In our program, the epilogue generated in the assembly file is:
+```assembly
+lw	    ra,12(sp)        # Restore return address
+lw	    s0,8(sp)         # Restore old frame pointer
+addi	    sp,sp,16         # Deallocate stack frame
+jr	    ra               # Jump to return address
+```
+
+---
+<br><br>
+# Task-4: Hex Dump & Disassembly
+
+In this task, we are expected to convert our ELF file into raw hex format and also disassemble it for analysis.
+
+---
+
+## Step 1: Convert to Hex
+
+Use the following command to get a raw hex file from the ELF file:
+
+```bash
+riscv32-unknown-elf-objcopy -O ihex hello.elf hello.hex
+```
+
+![Convert to hex command](/Week%201/assets/Task-4/convert_to_hex.png)
+
+Content of generated hex file:  
+![Hex file content](/Week%201/assets/Task-4/hex_file_content.png)
+
+---
+
+## Step 2: Disassemble
+
+Use the command below to disassemble the ELF file:
+
+```bash
+riscv32-unknown-elf-objdump -d hello.elf
+```
+
+![Disassemble command](/Week%201/assets/Task-4/disassemble_output.png)
+
+---
+
+## What is meant by **disassembling**?
+
+Disassembling is the process of converting machine code back to human-readable assembly code.  
+It’s a powerful tool that helps developers, reverse engineers, and system programmers understand what a compiled program actually does.
+
+It can be especially useful for debugging low-level issues, such as inspecting:
+- Which exact instructions ran
+- Whether registers and memory were used correctly
+- Whether optimizations or compiler bugs introduced side effects
+
+---
+
+## Step 3: Instruction Walkthrough
+
+| Field     | Value           | Meaning                                                                                       |
+|-----------|-----------------|-----------------------------------------------------------------------------------------------|
+| Address   | `0:`            | The memory offset or virtual address where this instruction is located                        |
+| Opcode    | `1141`          | The actual binary instruction in hex (machine code)                                           |
+| Mnemonic  | `addi`          | The name of the instruction, i.e., the assembly operation — in this case, "Add Immediate"     |
+| Operands  | `sp, sp, -16`   | Arguments or registers used by the instruction: here, subtract 16 from the stack pointer and store the result back in `sp` |
+
+---
+<br><br>
+# Task-5: ABI & Register Cheat-Sheet
+
+This is a complete list of the 32 integer registers in RISC-V RV32 architecture, with their:
+
+- Register numbers (x0 to x31)
+- ABI (Application Binary Interface) names
+- Typical role under the standard calling convention
+
+---
+
+## Step 1: All 32 Integer Registers
+
+| Register | ABI Name   | Role / Calling Convention                                      |
+|----------|------------|---------------------------------------------------------------|
+| x0       | zero       | Constant zero (always 0) — reads return 0, writes are ignored |
+| x1       | ra         | Return address (used by call / ret)                           |
+| x2       | sp         | Stack pointer                                                 |
+| x3       | gp         | Global pointer                                                |
+| x4       | tp         | Thread pointer                                                |
+| x5       | t0         | Temporary (caller-saved)                                      |
+| x6       | t1         | Temporary (caller-saved)                                      |
+| x7       | t2         | Temporary (caller-saved)                                      |
+| x8       | s0 or fp   | Saved register or frame pointer (callee-saved)                |
+| x9       | s1         | Saved register (callee-saved)                                 |
+| x10      | a0         | Argument 0 / return value                                     |
+| x11      | a1         | Argument 1 / return value                                     |
+| x12      | a2         | Argument 2                                                    |
+| x13      | a3         | Argument 3                                                    |
+| x14      | a4         | Argument 4                                                    |
+| x15      | a5         | Argument 5                                                    |
+| x16      | a6         | Argument 6                                                    |
+| x17      | a7         | Argument 7                                                    |
+| x18      | s2         | Saved register (callee-saved)                                 |
+| x19      | s3         | Saved register (callee-saved)                                 |
+| x20      | s4         | Saved register (callee-saved)                                 |
+| x21      | s5         | Saved register (callee-saved)                                 |
+| x22      | s6         | Saved register (callee-saved)                                 |
+| x23      | s7         | Saved register (callee-saved)                                 |
+| x24      | s8         | Saved register (callee-saved)                                 |
+| x25      | s9         | Saved register (callee-saved)                                 |
+| x26      | s10        | Saved register (callee-saved)                                 |
+| x27      | s11        | Saved register (callee-saved)                                 |
+| x28      | t3         | Temporary (caller-saved)                                      |
+| x29      | t4         | Temporary (caller-saved)                                      |
+| x30      | t5         | Temporary (caller-saved)                                      |
+| x31      | t6         | Temporary (caller-saved)                                      |
+
+---
+
+## Step 2: Calling Convention Summary
+
+- **Caller-saved** (`t0–t6`, `a0–a7`): Must be saved by the calling function if needed after a call.
+- **Callee-saved** (`s0–s11`): Must be preserved by the called function.
+- **sp**: Stack pointer — managed according to stack frame layout.
+- **ra**: Stores return address for function calls (`jalr`).
+- **zero**: Hardwired to 0 — always safe to read.
+
+---
+<br><br>
+# Task-6: Stepping with GDB
+
+In this section, we'll explore how we can run our elf file on a simulator (could be built in or external like qemu and spike) and also go through the debugging processing by using breakpoints and stepping.
+
+## Step 1: Run Qemu for ELF
+Run qemu for the required elf file using the below command.
+
+```bash
+qemu-system-riscv32 -M sifive_e -cpu sifive-e31 -nographic -kernel hello.elf -S -gdb tcp::1234
+```
+
+![Command for running qemu](/Week%201/assets/Task-6/qemu_command.png)
+
+## Step 2: Enter into GDB prompt
+Open another terminal window for entering into the gdb prompt.
+
+```bash
+riscv32-unknown-elf-gdb hello.elf
+```
+
+## Step 3: Add breakpoints and step
+
+Connect to qemu running on port 1234
+```bash
+target remote localhost:1234
+```
+
+Add breakpoint for main
+```bash
+break main
+```
+
+Run the script
+```bash
+continue
+```
+
+![GDB Commands](/Week%201/assets/Task-6/gdb_window.png)
+
+## Problem faced
+The gdb prompt is getting stuck at continue command. Ideally it should break at the specified breakpoint and then return the prompt.
+
+This is occuring when running it with qemu. I also tried it with the built in simulator using the `target sim` and `run` commands.
+Apparently, it seems the in-built simulator only supports `rv32i` base instruction set. I tried compiling my c file into this but it gives `multi-lib` error for which the whole riscv toolchain needs to be built again, tried that, no avail.
+
+With qemu, it didn't work either. It just seems to be stuck at ***continuing***. I tried searching for the entry point of the script in the ELF file for adding at the breakpoint but still it doesn't work
+```bash
+riscv32-unknown-elf-readelf -h hello.elf | grep 'Entry point'
+```
+
+I returned `0x100e2` and I tried putting that in the breakpoint but still the same situation.
+
+
+## Step 4: Info registers and disassemble
+![Info register and disassemble](/Week%201/assets/Task-6/disassemble.jpeg)
+
+---
+<br><br>
+# Running Under an Emulator
+
+This task demonstrates how to boot a bare-metal ELF and print to the UART console using QEMU.
+
+---
+
+## Minimal `hello.c` for Bare-Metal QEMU Run
+
+```c
+int main() {
+    puts("Hello, RISCV!");
+    return 0;
+}
+```
+
+**Compile it using:**
+```bash
+riscv32-unknown-elf-gcc -g -march=rv32imac -mabi=ilp32 -o hello.elf hello.c
+```
+
+**Run the ELF using QEMU:**
+```bash
+qemu-system-riscv32 -M sifive_e -cpu sifive-e31 -nographic -kernel hello.elf
+```
+
+![QEMU Output](/Week%201/assets/Task-7/qemu.png)
+
+---
+
+## Ideal Behaviour
+
+Ideally, it should print `"Hello, RISCV!"` in the UART console, but it goes blank after starting QEMU.
+
+---
+
+## Steps Done for Troubleshooting
+
+### Custom UART Print Implementation
+
+Created a minimal UART print routine:
+
+```c
+#define UART_ADDR 0x10013000
+
+void putchar(char c) {
+    *(volatile char*)UART_ADDR = c;
+}
+
+void print(const char* s) {
+    while (*s) {
+        putchar(*s++);
+    }
+}
+
+void _start() {
+    print("hello riscv\n");
+    while (1); // don't exit
+}
+```
+
+---
+
+### Custom Linker Script (`link.ld`)
+
+```ld
+SECTIONS
+{
+  . = 0x80000000;
+
+  .text : {
+    *(.text*)
+  }
+
+  .data : {
+    *(.data*)
+  }
+
+  .bss : {
+    *(.bss*)
+    *(COMMON)
+  }
+}
+```
+
+---
+
+### Compile with Custom Linker Script
+
+```bash
+riscv32-unknown-elf-gcc \
+  -nostdlib -nostartfiles \
+  -march=rv32ima -mabi=ilp32 \
+  -Wl,-T,link.ld \
+  -o hello.elf hello.c
+```
+
+---
+
+### Run with QEMU
+
+```bash
+qemu-system-riscv32 \
+  -machine sifive_e -nographic \
+  -bios none \
+  -kernel hello.elf
+```
+
+---
+<br><br>
+# Task-8: Exploring GCC Optimizations
+
+This section highlights the difference in assembly generated by using different optimization flags during compilation.
+
+---
+
+## Code to Analyze
+
+```c
+int main() {
+    printf("Hello, RISCV!");
+    return 0;
+}
+```
+
+---
+
+## Compilation Using `-O0` (No Optimization) and `-O2` (High Optimization)
+
+```bash
+riscv32-unknown-elf-gcc -O0 -S hello.c -o hello_O0.s
+riscv32-unknown-elf-gcc -O2 -S hello.c -o hello_O2.s
+```
+
+![O0 and O2 optimization compilation](/Week%201/assets/Task-8/o0_o2_compilation.png)
+
+---
+
+## Assembly Differences
+
+### `-O0`: No Optimization
+
+- Full call to `printf` preserved
+- Stack frames and return values handled explicitly
+- Intermediate values stored in memory
+
+This version is easier to debug but slower and larger.
+
+![O0 assembly](/Week%201/assets/Task-8/O0.png)
+
+---
+
+### `-O2`: High Optimization
+
+- Function calls may be inlined if small (though `printf()` typically isn’t)
+- Stack setup might be eliminated if unnecessary
+- Constants embedded directly
+- Redundant loads/stores removed
+
+![O2 assembly](/Week%201/assets/Task-8/O2.png)
+
+---
+
+## Conclusion
+
+On bare-metal or constrained systems:
+
+- `-O2` gives much better performance and size
+- `-O0` is useful only for debugging
+
+---
+<br><br>
+# Task-9: Inline Assembly Basics
+
+We have to write a c program that reads the cycle count of RISCV cycle counter using CSR (control status and register) using inline assembly
+
+## Step 1: Write c code
+```bash
+vim read_cycle.c
+
+unsigned int read_cycle() {
+     unsigned int cycle;
+     asm volatile("csrr %0, cycle": "=r"(cycle));
+     return cycle;
+}
+```
+
+## Generation of assembly
+```bash
+riscv32-unknown-elf-gcc -o read_cycle.s -S read_cycle.c
+```
+![Generated assembly file](/Week%201/assets/Task-9/inline_assembly.png)
+
+In this file, we can see that our riscv instruction is intact:
+`csrr a5, cycle`
+
+## Explanation
+
+`unsigned int read_cycle()` defines a function named read_cycle that returns an unsigned integer value containing the cycle counter value
+
+`unsigned int cycle` we declare an unsigned integer to store the cycle counter value read from the csr register
+
+`asm` allows to write inline assembly in c
+
+`volatile` tells the compiler not to make any optimizations or reorder this block. It's important because this reads from a hardware register
+
+`csrr %0, cycle`
+- csrr stand for control and status register read. This instruction is used to read from csr.
+- ***cycle*** is an alias for CSR 0xC00, cycle counter.
+- %0 is a placeholder for output register
+
+`=r`
+- `=` is the output operand
+- `r` tells the compiler to store the value returned from csr in a general purpose register
+- `r(cycle)` tells the compiler to copy/store the value stored in register into c, `cycle` variable
+
+---
 <br><br>
 # Task-10: Memory-Mapped I/O Demo
 
@@ -149,6 +641,8 @@ This ensures that the code doesn't fail on strict systems like RISCV etc and als
 
 
 In our code, we are manually ensuring that the address is word-aligned, if it was let's say **0x10012001** then the program might crash.
+
+---
 <br><br>
 # Task-11: Linker Script 101
 
@@ -235,6 +729,8 @@ RISC-V / Microcontroller Memory Map
 |--------|-----------------------------|------------------------------------|
 | Flash  | 0x00000000 to 0x0FFFFFFF    | Code & constants (read-only)       |
 | SRAM   | 0x10000000 to 0x1FFFFFFF    | Variables, stack, heap (read/write)|
+
+---
 <br><br>
 # Task-12: Start-up Code & crt0
 
@@ -377,13 +873,15 @@ riscv32-unknown-elf-gcc -march=rv32imac -mabi=ilp32 -nostartfiles -T link.ld -o 
 ```
 
 ## Verifying the ELF
-![Reading ELF](./assets/Task-12/reading_elf.png)
+![Reading ELF](/Week%201/assets/Task-12/reading_elf.png)
 
 ## Checking the entry point
-![Checking Entry point](./assets/Task-12/entry_point.png)
+![Checking Entry point](/Week%201/assets/Task-12/entry_point.png)
 
 ## Conclusion
 This task simulates a real embedded boot process — where no OS is present, and the CPU starts executing from a fixed address (like Flash). crt0.S prepares the system so main() can safely execute.
+
+---
 <br><br>
 # Task-13: Interrupt Primer
 
@@ -542,7 +1040,9 @@ trap_handler:
 ```
 
 ## OUTPUT
-![interrupt_primer](./assets/Task-13/interrupt_primer.png)
+![interrupt_primer](/Week%201/assets/Task-13/interrupt_primer.png)
+
+---
 <br><br>
 # Task 14:  rv32imac vs rv32imc – What’s the “A”? 
 ## Objective
@@ -561,8 +1061,8 @@ trap_handler:
   - Ensuring **safe concurrency** on multi-core or multi-threaded processors  
 - Without these atomic instructions, software would need to disable interrupts or use heavier synchronization methods, which impact performance and scalability.
 
+---
 <br><br>
-
 # Task 15: Atomic Test Program 
 ## Objective
 Demonstrate the use of the RISC-V atomic extension (`A`) to implement a simple spinlock using the Load-Reserved (LR) and Store-Conditional (SC) instructions in a two-thread pseudo-concurrent environment.
@@ -650,11 +1150,12 @@ qemu-system-riscv32 -machine virt -nographic -bios none -kernel atomic_test.elf
 ```
 
 ---
-![Atomic test](./assets/Task-15/atomic_test.png)
+![Atomic test](/Week%201/assets/Task-15/atomic_test.png)
+
+---
 
 ---
 <br><br>
-
 # Task 16: Using Newlib printf Without an OS
 
 ## Objective
@@ -870,10 +1371,10 @@ qemu-system-riscv32 -machine virt -nographic -bios none -kernel main.elf
 
 ### OUTPUT
 
-![newlib printf](./assets/Task-16/task-16.png)
+![newlib printf](/Week%201/assets/Task-16/task-16.png)
 
+---
 <br><br>
-
 # Task 17: RISC-V Endianness & Struct Packing Analysis
 
 ## Objective
@@ -1089,8 +1590,8 @@ qemu-system-riscv32 -machine virt -nographic -bios none -kernel endianness.elf
 
 ---
 
-![Output 1](./assets/Task-17/task-17_1_new.png)
-![Output 2](./assets/Task-17/task-17_2.png)
+![Output 1](/Week%201/assets/Task-17/task-17_1_new.png)
+![Output 2](/Week%201/assets/Task-17/task-17_2.png)
 
 
 ## Key Technical Points
@@ -1114,7 +1615,6 @@ qemu-system-riscv32 -machine virt -nographic -bios none -kernel endianness.elf
 - Endianness affects how bit fields map to memory bytes
 
 ---
-
 ## Key Observations
 
 - **RISC-V is little-endian by default**: The union trick confirms LSB is stored at the lowest memory address
@@ -1125,486 +1625,7 @@ qemu-system-riscv32 -machine virt -nographic -bios none -kernel endianness.elf
 - **Memory layout visualization**: Direct byte examination reveals how data is actually stored in memory
 
 ---
+
+---
 <br><br>
-# Task-2: Compile "Hello, RISC-V"
 
-We will write a very basic hello world kind of program in c and will cross-compile for rv32imc architecture, and verify the output elf file. 
-
-## Step 1: Create the Source File
-
-Create a file named `hello.c`:
-```bash
-vim hello.c
-```
-
-Paste the following code into `hello.c`:
-```c
-#include <stdio.h>
-
-int main() {
-    printf("Hello, RISC-V!");
-    return 0;
-}
-```
-
----
-
-## Step 2: Compile for RISC-V
-
-Compile the program for the `rv32imac` target:
-```bash
-riscv32-unknown-elf-gcc -o hello.elf hello.c
-```
-
-![Output of program compilation](./assets/Task-2/compilation.png)
-
----
-
-## Step 3: Verify the Output File
-
-Check that the compiled file is an ELF file:
-```bash
-file hello.elf
-```
-
-![Elf file check](./assets/Task-2/verification.png)
-
-<br><br>
-# Task-3: From C to Assembly
-
-In this task, we will generate the assembly file for our simple C program and explain the meaning of **prologue** and **epilogue**.
-
----
-
-## Step 1: Generate Assembly File
-
-Use the following command to generate the assembly file:
-```bash
-riscv32-unknown-elf-gcc -S -O0 hello.c
-```
-
-![Assembly file command](./assets/Task-3/assembly_command.png)
-
-**Flags used:**
-- `-S`: Generate assembly instead of object code.
-- `-O0`: Disable optimizations to see the raw function structure.
-
----
-
-## Understanding **Prologue** and **Epilogue**
-
-![Complete assembly code](./assets/Task-3/assembly_code.png)
-
-### Prologue
-
-The **prologue** is the code at the start of a function. It:
-- Allocates stack space
-- Saves callee-saved registers (like `s0`, `ra`)
-- Sets up the frame pointer (`s0`)
-
-In our simple C program, the prologue is:
-```assembly
-addi	sp,sp,-16       # Allocate 16 bytes on the stack
-sw	ra,12(sp)       # Save return address
-sw	s0,8(sp)        # Save old frame pointer
-addi	s0,sp,16        # Set new frame pointer (s0 = old sp)
-```
-
-### Epilogue
-
-The **epilogue** is the code at the end of the function. It:
-- Restores saved registers
-- Deallocates stack
-- Returns to the caller
-
-In our program, the epilogue generated in the assembly file is:
-```assembly
-lw	    ra,12(sp)        # Restore return address
-lw	    s0,8(sp)         # Restore old frame pointer
-addi	    sp,sp,16         # Deallocate stack frame
-jr	    ra               # Jump to return address
-```
-
-<br><br>
-# Task-4: Hex Dump & Disassembly
-
-In this task, we are expected to convert our ELF file into raw hex format and also disassemble it for analysis.
-
----
-
-## Step 1: Convert to Hex
-
-Use the following command to get a raw hex file from the ELF file:
-
-```bash
-riscv32-unknown-elf-objcopy -O ihex hello.elf hello.hex
-```
-
-![Convert to hex command](./assets/Task-4/convert_to_hex.png)
-
-Content of generated hex file:  
-![Hex file content](./assets/Task-4/hex_file_content.png)
-
----
-
-## Step 2: Disassemble
-
-Use the command below to disassemble the ELF file:
-
-```bash
-riscv32-unknown-elf-objdump -d hello.elf
-```
-
-![Disassemble command](./assets/Task-4/disassemble_output.png)
-
----
-
-## What is meant by **disassembling**?
-
-Disassembling is the process of converting machine code back to human-readable assembly code.  
-It’s a powerful tool that helps developers, reverse engineers, and system programmers understand what a compiled program actually does.
-
-It can be especially useful for debugging low-level issues, such as inspecting:
-- Which exact instructions ran
-- Whether registers and memory were used correctly
-- Whether optimizations or compiler bugs introduced side effects
-
----
-
-## Step 3: Instruction Walkthrough
-
-| Field     | Value           | Meaning                                                                                       |
-|-----------|-----------------|-----------------------------------------------------------------------------------------------|
-| Address   | `0:`            | The memory offset or virtual address where this instruction is located                        |
-| Opcode    | `1141`          | The actual binary instruction in hex (machine code)                                           |
-| Mnemonic  | `addi`          | The name of the instruction, i.e., the assembly operation — in this case, "Add Immediate"     |
-| Operands  | `sp, sp, -16`   | Arguments or registers used by the instruction: here, subtract 16 from the stack pointer and store the result back in `sp` |
-
-<br><br>
-# Task-5: ABI & Register Cheat-Sheet
-
-This is a complete list of the 32 integer registers in RISC-V RV32 architecture, with their:
-
-- Register numbers (x0 to x31)
-- ABI (Application Binary Interface) names
-- Typical role under the standard calling convention
-
----
-
-## Step 1: All 32 Integer Registers
-
-| Register | ABI Name   | Role / Calling Convention                                      |
-|----------|------------|---------------------------------------------------------------|
-| x0       | zero       | Constant zero (always 0) — reads return 0, writes are ignored |
-| x1       | ra         | Return address (used by call / ret)                           |
-| x2       | sp         | Stack pointer                                                 |
-| x3       | gp         | Global pointer                                                |
-| x4       | tp         | Thread pointer                                                |
-| x5       | t0         | Temporary (caller-saved)                                      |
-| x6       | t1         | Temporary (caller-saved)                                      |
-| x7       | t2         | Temporary (caller-saved)                                      |
-| x8       | s0 or fp   | Saved register or frame pointer (callee-saved)                |
-| x9       | s1         | Saved register (callee-saved)                                 |
-| x10      | a0         | Argument 0 / return value                                     |
-| x11      | a1         | Argument 1 / return value                                     |
-| x12      | a2         | Argument 2                                                    |
-| x13      | a3         | Argument 3                                                    |
-| x14      | a4         | Argument 4                                                    |
-| x15      | a5         | Argument 5                                                    |
-| x16      | a6         | Argument 6                                                    |
-| x17      | a7         | Argument 7                                                    |
-| x18      | s2         | Saved register (callee-saved)                                 |
-| x19      | s3         | Saved register (callee-saved)                                 |
-| x20      | s4         | Saved register (callee-saved)                                 |
-| x21      | s5         | Saved register (callee-saved)                                 |
-| x22      | s6         | Saved register (callee-saved)                                 |
-| x23      | s7         | Saved register (callee-saved)                                 |
-| x24      | s8         | Saved register (callee-saved)                                 |
-| x25      | s9         | Saved register (callee-saved)                                 |
-| x26      | s10        | Saved register (callee-saved)                                 |
-| x27      | s11        | Saved register (callee-saved)                                 |
-| x28      | t3         | Temporary (caller-saved)                                      |
-| x29      | t4         | Temporary (caller-saved)                                      |
-| x30      | t5         | Temporary (caller-saved)                                      |
-| x31      | t6         | Temporary (caller-saved)                                      |
-
----
-
-## Step 2: Calling Convention Summary
-
-- **Caller-saved** (`t0–t6`, `a0–a7`): Must be saved by the calling function if needed after a call.
-- **Callee-saved** (`s0–s11`): Must be preserved by the called function.
-- **sp**: Stack pointer — managed according to stack frame layout.
-- **ra**: Stores return address for function calls (`jalr`).
-- **zero**: Hardwired to 0 — always safe to read.
-<br><br>
-# Task-6: Stepping with GDB
-
-In this section, we'll explore how we can run our elf file on a simulator (could be built in or external like qemu and spike) and also go through the debugging processing by using breakpoints and stepping.
-
-## Step 1: Run Qemu for ELF
-Run qemu for the required elf file using the below command.
-
-```bash
-qemu-system-riscv32 -M sifive_e -cpu sifive-e31 -nographic -kernel hello.elf -S -gdb tcp::1234
-```
-
-![Command for running qemu](./assets/Task-6/qemu_command.png)
-
-## Step 2: Enter into GDB prompt
-Open another terminal window for entering into the gdb prompt.
-
-```bash
-riscv32-unknown-elf-gdb hello.elf
-```
-
-## Step 3: Add breakpoints and step
-
-Connect to qemu running on port 1234
-```bash
-target remote localhost:1234
-```
-
-Add breakpoint for main
-```bash
-break main
-```
-
-Run the script
-```bash
-continue
-```
-
-![GDB Commands](./assets/Task-6/gdb_window.png)
-
-## Problem faced
-The gdb prompt is getting stuck at continue command. Ideally it should break at the specified breakpoint and then return the prompt.
-
-This is occuring when running it with qemu. I also tried it with the built in simulator using the `target sim` and `run` commands.
-Apparently, it seems the in-built simulator only supports `rv32i` base instruction set. I tried compiling my c file into this but it gives `multi-lib` error for which the whole riscv toolchain needs to be built again, tried that, no avail.
-
-With qemu, it didn't work either. It just seems to be stuck at ***continuing***. I tried searching for the entry point of the script in the ELF file for adding at the breakpoint but still it doesn't work
-```bash
-riscv32-unknown-elf-readelf -h hello.elf | grep 'Entry point'
-```
-
-I returned `0x100e2` and I tried putting that in the breakpoint but still the same situation.
-
-
-## Step 4: Info registers and disassemble
-![Info register and disassemble](./assets/Task-6/disassemble.jpeg)
-
-
-
-<br><br>
-# Running Under an Emulator
-
-This task demonstrates how to boot a bare-metal ELF and print to the UART console using QEMU.
-
----
-
-## Minimal `hello.c` for Bare-Metal QEMU Run
-
-```c
-int main() {
-    puts("Hello, RISCV!");
-    return 0;
-}
-```
-
-**Compile it using:**
-```bash
-riscv32-unknown-elf-gcc -g -march=rv32imac -mabi=ilp32 -o hello.elf hello.c
-```
-
-**Run the ELF using QEMU:**
-```bash
-qemu-system-riscv32 -M sifive_e -cpu sifive-e31 -nographic -kernel hello.elf
-```
-
-![QEMU Output](./assets/Task-7/qemu.png)
-
----
-
-## Ideal Behaviour
-
-Ideally, it should print `"Hello, RISCV!"` in the UART console, but it goes blank after starting QEMU.
-
----
-
-## Steps Done for Troubleshooting
-
-### Custom UART Print Implementation
-
-Created a minimal UART print routine:
-
-```c
-#define UART_ADDR 0x10013000
-
-void putchar(char c) {
-    *(volatile char*)UART_ADDR = c;
-}
-
-void print(const char* s) {
-    while (*s) {
-        putchar(*s++);
-    }
-}
-
-void _start() {
-    print("hello riscv\n");
-    while (1); // don't exit
-}
-```
-
----
-
-### Custom Linker Script (`link.ld`)
-
-```ld
-SECTIONS
-{
-  . = 0x80000000;
-
-  .text : {
-    *(.text*)
-  }
-
-  .data : {
-    *(.data*)
-  }
-
-  .bss : {
-    *(.bss*)
-    *(COMMON)
-  }
-}
-```
-
----
-
-### Compile with Custom Linker Script
-
-```bash
-riscv32-unknown-elf-gcc \
-  -nostdlib -nostartfiles \
-  -march=rv32ima -mabi=ilp32 \
-  -Wl,-T,link.ld \
-  -o hello.elf hello.c
-```
-
----
-
-### Run with QEMU
-
-```bash
-qemu-system-riscv32 \
-  -machine sifive_e -nographic \
-  -bios none \
-  -kernel hello.elf
-```
-<br><br>
-# Task-8: Exploring GCC Optimizations
-
-This section highlights the difference in assembly generated by using different optimization flags during compilation.
-
----
-
-## Code to Analyze
-
-```c
-int main() {
-    printf("Hello, RISCV!");
-    return 0;
-}
-```
-
----
-
-## Compilation Using `-O0` (No Optimization) and `-O2` (High Optimization)
-
-```bash
-riscv32-unknown-elf-gcc -O0 -S hello.c -o hello_O0.s
-riscv32-unknown-elf-gcc -O2 -S hello.c -o hello_O2.s
-```
-
-![O0 and O2 optimization compilation](./assets/Task-8/o0_o2_compilation.png)
-
----
-
-## Assembly Differences
-
-### `-O0`: No Optimization
-
-- Full call to `printf` preserved
-- Stack frames and return values handled explicitly
-- Intermediate values stored in memory
-
-This version is easier to debug but slower and larger.
-
-![O0 assembly](./assets/Task-8/O0.png)
-
----
-
-### `-O2`: High Optimization
-
-- Function calls may be inlined if small (though `printf()` typically isn’t)
-- Stack setup might be eliminated if unnecessary
-- Constants embedded directly
-- Redundant loads/stores removed
-
-![O2 assembly](./assets/Task-8/O2.png)
-
----
-
-## Conclusion
-
-On bare-metal or constrained systems:
-
-- `-O2` gives much better performance and size
-- `-O0` is useful only for debugging
-<br><br>
-# Task-9: Inline Assembly Basics
-
-We have to write a c program that reads the cycle count of RISCV cycle counter using CSR (control status and register) using inline assembly
-
-## Step 1: Write c code
-```bash
-vim read_cycle.c
-
-unsigned int read_cycle() {
-     unsigned int cycle;
-     asm volatile("csrr %0, cycle": "=r"(cycle));
-     return cycle;
-}
-```
-
-## Generation of assembly
-```bash
-riscv32-unknown-elf-gcc -o read_cycle.s -S read_cycle.c
-```
-![Generated assembly file](./assets/Task-9/inline_assembly.png)
-
-In this file, we can see that our riscv instruction is intact:
-`csrr a5, cycle`
-
-## Explanation
-
-`unsigned int read_cycle()` defines a function named read_cycle that returns an unsigned integer value containing the cycle counter value
-
-`unsigned int cycle` we declare an unsigned integer to store the cycle counter value read from the csr register
-
-`asm` allows to write inline assembly in c
-
-`volatile` tells the compiler not to make any optimizations or reorder this block. It's important because this reads from a hardware register
-
-`csrr %0, cycle`
-- csrr stand for control and status register read. This instruction is used to read from csr.
-- ***cycle*** is an alias for CSR 0xC00, cycle counter.
-- %0 is a placeholder for output register
-
-`=r`
-- `=` is the output operand
-- `r` tells the compiler to store the value returned from csr in a general purpose register
-- `r(cycle)` tells the compiler to copy/store the value stored in register into c, `cycle` variable
-<br><br>
