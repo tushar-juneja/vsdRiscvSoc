@@ -34,6 +34,16 @@ So, we use a startup assembly file (`crt0.s`) that sets up the basic runtime env
 
 ---
 
+## main C program
+```c
+    int main() {
+        while(1) {
+
+        }
+        return 0;
+    }
+```
+
 ## Writing `crt0.s`
 
 ```assembly
@@ -120,4 +130,19 @@ SECTIONS
 
 - `_start` is the entry point (not `main`). That’s why `ENTRY(_start)` is in the linker script.
 - `la sp, _stack_top` sets up the stack manually (no OS to do this).
+
 - `.data` copy and `.bss` zeroing are essential for C runtime correctness.
+
+## Compilation
+```bash
+riscv32-unknown-elf-gcc -march=rv32imac -mabi=ilp32 -nostartfiles -T link.ld -o program.elf crt0.s main.c
+```
+
+## Verifying the ELF
+![Reading ELF](./assets/Task-12/reading_elf.png)
+
+## Checking the entry point
+![Checking Entry point](./assets/Task-12/entry_point.png)
+
+## Conclusion
+This task simulates a real embedded boot process — where no OS is present, and the CPU starts executing from a fixed address (like Flash). crt0.S prepares the system so main() can safely execute.
