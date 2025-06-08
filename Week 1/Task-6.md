@@ -51,4 +51,7 @@ riscv32-unknown-elf-readelf -h hello.elf | grep 'Entry point'
 I returned `0x100e2` and I tried putting that in the breakpoint but still the same situation.
 
 
+## Step 4: Info registers and disassemble
+![Info register and disassemble](./assets/Task-6/disassemble.jpeg)
+
 
