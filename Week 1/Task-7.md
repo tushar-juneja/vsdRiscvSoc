@@ -23,7 +23,7 @@ riscv32-unknown-elf-gcc -g -march=rv32imac -mabi=ilp32 -o hello.elf hello.c
 qemu-system-riscv32 -M sifive_e -cpu sifive-e31 -nographic -kernel hello.elf
 ```
 
-![QEMU Output](./assets/Task-7/qemu.png)
+![QEMU Output](/Week%201/assets/Task-7/qemu.png)
 
 ---
 

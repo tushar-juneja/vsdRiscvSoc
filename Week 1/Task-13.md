@@ -155,4 +155,4 @@ trap_handler:
 ```
 
 ## OUTPUT
-![interrupt_primer](./assets/Task-13/interrupt_primer.png)
+![interrupt_primer](/Week%201/assets/Task-13/interrupt_primer.png)

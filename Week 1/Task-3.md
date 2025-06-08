@@ -11,7 +11,7 @@ Use the following command to generate the assembly file:
 riscv32-unknown-elf-gcc -S -O0 hello.c
 ```
 
-![Assembly file command](./assets/Task-3/assembly_command.png)
+![Assembly file command](/Week%201/assets/Task-3/assembly_command.png)
 
 **Flags used:**
 - `-S`: Generate assembly instead of object code.
@@ -21,7 +21,7 @@ riscv32-unknown-elf-gcc -S -O0 hello.c
 
 ## Understanding **Prologue** and **Epilogue**
 
-![Complete assembly code](./assets/Task-3/assembly_code.png)
+![Complete assembly code](/Week%201/assets/Task-3/assembly_code.png)
 
 ### Prologue
 

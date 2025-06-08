@@ -139,10 +139,10 @@ riscv32-unknown-elf-gcc -march=rv32imac -mabi=ilp32 -nostartfiles -T link.ld -o 
 ```
 
 ## Verifying the ELF
-![Reading ELF](./assets/Task-12/reading_elf.png)
+![Reading ELF](/Week%201/assets/Task-12/reading_elf.png)
 
 ## Checking the entry point
-![Checking Entry point](./assets/Task-12/entry_point.png)
+![Checking Entry point](/Week%201/assets/Task-12/entry_point.png)
 
 ## Conclusion
 This task simulates a real embedded boot process — where no OS is present, and the CPU starts executing from a fixed address (like Flash). crt0.S prepares the system so main() can safely execute.

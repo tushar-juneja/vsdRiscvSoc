@@ -1,50 +1,52 @@
 import os
-import glob
 import re
 
-root_dir = os.getcwd()
-readme_path = os.path.join(root_dir, "README.md")
+MAIN_README = "README"
+WEEK_README_NAME = "README.md"
 
-def merge_tasks_to_week_md(week_path, week_number):
-    task_files = sorted(glob.glob(os.path.join(week_path, "Task-*.md")))
-    output_file = os.path.join(week_path, f"Week-{week_number}.md")
+TASK_FILE_PATTERN = re.compile(r'task[-_]?(\d+)\.md', re.IGNORECASE)
 
-    with open(output_file, "w") as out:
-        for task_file in task_files:
-            with open(task_file, "r") as f:
-                # out.write(f"\n\n---\n\n## {os.path.basename(task_file)}\n\n")
-                out.write(f.read())
-                out.write(f"\n<br><br>\n")
+def generate_weekly_readme(week_folder):
+    task_files = []
 
-    return output_file
+    for fname in os.listdir(week_folder):
+        match = TASK_FILE_PATTERN.match(fname)
+        if match:
+            task_num = int(match.group(1))
+            task_files.append((task_num, fname))
 
-def collect_weeks():
-    return sorted([
-        d for d in os.listdir(root_dir)
-        if os.path.isdir(d) and re.match(r"Week\s+\d+", d)
-    ])
+    # Sort by task number (not alphabetically)
+    task_files.sort(key=lambda x: x[0])
 
-def update_readme(week_files):
-    with open(readme_path, "w") as readme:
-        readme.write("# Weekly Tasks Summary\n")
+    week_readme_path = os.path.join(week_folder, "README.md")
+    with open(week_readme_path, "w", encoding="utf-8") as week_readme:
+        week_title = os.path.basename(week_folder)
+        week_readme.write(f"# {week_title} Summary\n\n")
 
-        for week_file in week_files:
-            week_name = os.path.basename(week_file).replace(".md", "")
-            readme.write(f"\n\n## {week_name}\n\n")
+        for task_num, fname in task_files:
+            full_path = os.path.join(week_folder, fname)
+            with open(full_path, "r", encoding="utf-8") as tf:
+                content = tf.read()
+                week_readme.write(f"## Task {task_num}: {fname}\n\n")
+                week_readme.write(content.strip() + "\n\n")
+                
+def update_main_readme():
+    all_week_folders = sorted(
+        [f for f in os.listdir('.') if os.path.isdir(f) and f.lower().startswith("week")],
+        key=lambda x: int(re.search(r'\d+', x).group())
+    )
 
-            with open(week_file, "r") as f:
-                readme.write(f.read())
+    with open(MAIN_README, "w", encoding="utf-8") as main_readme:
+        main_readme.write("# Complete Weekly Summary\n\n")
+
+        for week_folder in all_week_folders:
+            generate_weekly_readme(week_folder)
+
+            week_readme_path = os.path.join(week_folder, WEEK_README_NAME)
+            with open(week_readme_path, "r", encoding="utf-8") as f:
+                content = f.read()
+                main_readme.write(content + "\n")
 
 if __name__ == "__main__":
-    week_dirs = collect_weeks()
-    week_md_files = []
-
-    for week_dir in week_dirs:
-        week_num = ''.join(filter(str.isdigit, week_dir))
-        print(f"Merging tasks in: {week_dir}")
-        week_md = merge_tasks_to_week_md(week_dir, week_num)
-        week_md_files.append(week_md)
-
-    print("Updating README.md...")
-    update_readme(week_md_files)
-    print("Done.")
+    update_main_readme()
+    print("✅ All week READMEs generated and main README assembled.")

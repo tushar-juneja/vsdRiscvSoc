@@ -22,7 +22,7 @@ riscv32-unknown-elf-gcc -O0 -S hello.c -o hello_O0.s
 riscv32-unknown-elf-gcc -O2 -S hello.c -o hello_O2.s
 ```
 
-![O0 and O2 optimization compilation](./assets/Task-8/o0_o2_compilation.png)
+![O0 and O2 optimization compilation](/Week%201/assets/Task-8/o0_o2_compilation.png)
 
 ---
 
@@ -36,7 +36,7 @@ riscv32-unknown-elf-gcc -O2 -S hello.c -o hello_O2.s
 
 This version is easier to debug but slower and larger.
 
-![O0 assembly](./assets/Task-8/O0.png)
+![O0 assembly](/Week%201/assets/Task-8/O0.png)
 
 ---
 
@@ -47,7 +47,7 @@ This version is easier to debug but slower and larger.
 - Constants embedded directly
 - Redundant loads/stores removed
 
-![O2 assembly](./assets/Task-8/O2.png)
+![O2 assembly](/Week%201/assets/Task-8/O2.png)
 
 ---
 

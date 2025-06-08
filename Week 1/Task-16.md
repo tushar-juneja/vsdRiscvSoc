@@ -214,4 +214,4 @@ qemu-system-riscv32 -machine virt -nographic -bios none -kernel main.elf
 
 ### OUTPUT
 
-![newlib printf](./assets/Task-16/task-16.png)
+![newlib printf](/Week%201/assets/Task-16/task-16.png)

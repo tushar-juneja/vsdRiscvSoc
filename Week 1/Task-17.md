@@ -214,8 +214,8 @@ qemu-system-riscv32 -machine virt -nographic -bios none -kernel endianness.elf
 
 ---
 
-![Output 1](./assets/Task-17/task-17_1_new.png)
-![Output 2](./assets/Task-17/task-17_2.png)
+![Output 1](/Week%201/assets/Task-17/task-17_1_new.png)
+![Output 2](/Week%201/assets/Task-17/task-17_2.png)
 
 
 ## Key Technical Points

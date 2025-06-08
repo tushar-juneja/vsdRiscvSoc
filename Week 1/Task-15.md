@@ -86,6 +86,6 @@ qemu-system-riscv32 -machine virt -nographic -bios none -kernel atomic_test.elf
 ```
 
 ---
-![Atomic test](./assets/Task-15/atomic_test.png)
+![Atomic test](/Week%201/assets/Task-15/atomic_test.png)
 
 ---

@@ -12,10 +12,10 @@ Use the following command to get a raw hex file from the ELF file:
 riscv32-unknown-elf-objcopy -O ihex hello.elf hello.hex
 ```
 
-![Convert to hex command](./assets/Task-4/convert_to_hex.png)
+![Convert to hex command](/Week%201/assets/Task-4/convert_to_hex.png)
 
 Content of generated hex file:  
-![Hex file content](./assets/Task-4/hex_file_content.png)
+![Hex file content](/Week%201/assets/Task-4/hex_file_content.png)
 
 ---
 
@@ -27,7 +27,7 @@ Use the command below to disassemble the ELF file:
 riscv32-unknown-elf-objdump -d hello.elf
 ```
 
-![Disassemble command](./assets/Task-4/disassemble_output.png)
+![Disassemble command](/Week%201/assets/Task-4/disassemble_output.png)
 
 ---
 

@@ -28,7 +28,7 @@ Compile the program for the `rv32imac` target:
 riscv32-unknown-elf-gcc -o hello.elf hello.c
 ```
 
-![Output of program compilation](./assets/Task-2/compilation.png)
+![Output of program compilation](/Week%201/assets/Task-2/compilation.png)
 
 ---
 
@@ -39,4 +39,4 @@ Check that the compiled file is an ELF file:
 file hello.elf
 ```
 
-![Elf file check](./assets/Task-2/verification.png)
+![Elf file check](/Week%201/assets/Task-2/verification.png)

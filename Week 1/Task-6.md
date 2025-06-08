@@ -9,7 +9,7 @@ Run qemu for the required elf file using the below command.
 qemu-system-riscv32 -M sifive_e -cpu sifive-e31 -nographic -kernel hello.elf -S -gdb tcp::1234
 ```
 
-![Command for running qemu](./assets/Task-6/qemu_command.png)
+![Command for running qemu](/Week%201/assets/Task-6/qemu_command.png)
 
 ## Step 2: Enter into GDB prompt
 Open another terminal window for entering into the gdb prompt.
@@ -35,7 +35,7 @@ Run the script
 continue
 ```
 
-![GDB Commands](./assets/Task-6/gdb_window.png)
+![GDB Commands](/Week%201/assets/Task-6/gdb_window.png)
 
 ## Problem faced
 The gdb prompt is getting stuck at continue command. Ideally it should break at the specified breakpoint and then return the prompt.
@@ -52,6 +52,6 @@ I returned `0x100e2` and I tried putting that in the breakpoint but still the sa
 
 
 ## Step 4: Info registers and disassemble
-![Info register and disassemble](./assets/Task-6/disassemble.jpeg)
+![Info register and disassemble](/Week%201/assets/Task-6/disassemble.jpeg)
 
 

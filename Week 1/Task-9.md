@@ -17,7 +17,7 @@ unsigned int read_cycle() {
 ```bash
 riscv32-unknown-elf-gcc -o read_cycle.s -S read_cycle.c
 ```
-![Generated assembly file](./assets/Task-9/inline_assembly.png)
+![Generated assembly file](/Week%201/assets/Task-9/inline_assembly.png)
 
 In this file, we can see that our riscv instruction is intact:
 `csrr a5, cycle`
