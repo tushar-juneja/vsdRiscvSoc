@@ -1,8 +1,3 @@
-# Weekly Tasks Summary
-
-
-## Week-1
-
 # Task-1: Install & Sanity-Check the RISC-V Toolchain
 
 The goal is to download, install and verify the risc-v toolchain on pc.
